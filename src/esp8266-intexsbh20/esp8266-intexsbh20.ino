@@ -96,10 +96,11 @@ void setup()
 {
   Serial.begin(115200); // 74880 Baud is the default data rate of the ESP8266 bootloader
   // Relé pinek beállítása (alapértelmezetten kikapcsolva)
-  pinMode(RELAY1_PIN, OUTPUT);
-  pinMode(RELAY2_PIN, OUTPUT);
   digitalWrite(RELAY1_PIN, LOW);
   digitalWrite(RELAY2_PIN, LOW);
+  pinMode(RELAY1_PIN, OUTPUT);
+  pinMode(RELAY2_PIN, OUTPUT);
+
 
   // DS18B20 busz indítása
   ds18b20.begin();

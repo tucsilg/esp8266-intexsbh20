@@ -56,9 +56,9 @@
 #define SERIAL_DEBUG
 
 // PIN Definíciók (D1 Mini esetén)
-#define ONEWIRE_BUS_PIN  D2 // GPIO14 (D2) - DS18B20 közös busz
-#define RELAY1_PIN       D1 // GPIO12 (D3) - Relé 1
-#define RELAY2_PIN       D0 // GPIO13 (D4) - Relé 2
+#define ONEWIRE_BUS_PIN  D2 // GPIO04 (D2) - DS18B20 közös busz
+#define RELAY1_PIN       D1 // GPIO05 (D1) - Relé 1
+#define RELAY2_PIN       D0 // GPIO16 (D0) - Relé 2
 
 /*****************************************************************************/
 
@@ -113,8 +113,8 @@ namespace MQTT_TOPIC
   const char WIFI_TEMP[]    = "layz/wifi/temp";
   const char STATE[]        = "layz/wifi/state";
   const char OTA[]          = "layz/wifi/update";
-  const char RELAY1[]       = "layz/pool/relay1state";
-  const char RELAY2[]       = "layz/pool/relay2state";
+  const char RELAY1[]       = "layz/pool/relay1";
+  const char RELAY2[]       = "layz/pool/relay2";
   const char TEMP1[]        = "layz/pool/temp1";
   const char TEMP2[]        = "layz/pool/temp2";
   const char TEMP3[]        = "layz/pool/temp3";

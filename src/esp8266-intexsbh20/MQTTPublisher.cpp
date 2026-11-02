@@ -179,4 +179,6 @@ void MQTTPublisher::loop()
 #endif
     }
   }
+  mqttClient.publish(MQTT_TOPIC::RELAY1, digitalRead(RELAY1_PIN) ? "on" : "off", retainAll);
+  mqttClient.publish(MQTT_TOPIC::RELAY2, digitalRead(RELAY2_PIN) ? "on" : "off", retainAll);
 }
