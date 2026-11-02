@@ -53,12 +53,12 @@
 // disconnect to the MQTT server
 //#define FORCE_WIFI_SLEEP
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 // PIN Definíciók (D1 Mini esetén)
 #define ONEWIRE_BUS_PIN  D2 // GPIO14 (D2) - DS18B20 közös busz
-#define RELAY1_PIN       D3 // GPIO12 (D3) - Relé 1
-#define RELAY2_PIN       D4 // GPIO13 (D4) - Relé 2
+#define RELAY1_PIN       D1 // GPIO12 (D3) - Relé 1
+#define RELAY2_PIN       D0 // GPIO13 (D4) - Relé 2
 
 /*****************************************************************************/
 
@@ -97,35 +97,41 @@ namespace CONFIG_TAG
 namespace MQTT_TOPIC
 {
   // publish
-  const char BUBBLE[]       = "pool/bubble";
-  const char DISINFECTION[] = "pool/disinfection"; // SJB-HS only
-  const char ERROR[]        = "pool/error";
-  const char FILTER[]       = "pool/filter";
-  const char HEATER[]       = "pool/heater";
-  const char JET[]          = "pool/jet"; // SJB-HS only
-  const char MODEL[]        = "pool/model";
-  const char POWER[]        = "pool/power";
-  const char WATER_ACT[]    = "pool/water/tempAct";
-  const char WATER_SET[]    = "pool/water/tempSet";
-  const char VERSION[]      = "wifi/version";
-  const char IP[]           = "wifi/ip";
-  const char RSSI[]         = "wifi/rssi";
-  const char WIFI_TEMP[]    = "wifi/temp";
-  const char STATE[]        = "wifi/state";
-  const char OTA[]          = "wifi/update";
+  const char BUBBLE[]       = "layz/pool/bubble";
+  const char DISINFECTION[] = "layz/pool/disinfection"; // SJB-HS only
+  const char ERROR[]        = "layz/pool/error";
+  const char FILTER[]       = "layz/pool/filter";
+  const char HEATER[]       = "layz/pool/heater";
+  const char JET[]          = "layz/pool/jet"; // SJB-HS only
+  const char MODEL[]        = "layz/pool/model";
+  const char POWER[]        = "layz/pool/power";
+  const char WATER_ACT[]    = "layz/pool/water/tempAct";
+  const char WATER_SET[]    = "layz/pool/water/tempSet";
+  const char VERSION[]      = "layz/wifi/version";
+  const char IP[]           = "layz/wifi/ip";
+  const char RSSI[]         = "layz/wifi/rssi";
+  const char WIFI_TEMP[]    = "layz/wifi/temp";
+  const char STATE[]        = "layz/wifi/state";
+  const char OTA[]          = "layz/wifi/update";
+  const char RELAY1[]       = "layz/pool/relay1state";
+  const char RELAY2[]       = "layz/pool/relay2state";
+  const char TEMP1[]        = "layz/pool/temp1";
+  const char TEMP2[]        = "layz/pool/temp2";
+  const char TEMP3[]        = "layz/pool/temp3";
+  
 
 
   // subscribe
-  const char CMD_BUBBLE[]       = "pool/command/bubble";
-  const char CMD_DISINFECTION[] = "pool/command/disinfection"; // SJB-HS only
-  const char CMD_FILTER[]       = "pool/command/filter";
-  const char CMD_HEATER[]       = "pool/command/heater";
-  const char CMD_JET[]          = "pool/command/jet"; // SJB-HS only
-  const char CMD_POWER[]        = "pool/command/power";
-  const char CMD_WATER[]        = "pool/command/water/tempSet";
-  const char CMD_OTA[]          = "wifi/command/update";
-  const char CMD_RELAY1[]       = "pool/command/relay1";
-  const char CMD_RELAY2[]       = "pool/command/relay2";
+  const char CMD_BUBBLE[]       = "layz/pool/command/bubble";
+  const char CMD_DISINFECTION[] = "layz/pool/command/disinfection"; // SJB-HS only
+  const char CMD_FILTER[]       = "layz/pool/command/filter";
+  const char CMD_HEATER[]       = "layz/pool/command/heater";
+  const char CMD_JET[]          = "layz/pool/command/jet"; // SJB-HS only
+  const char CMD_POWER[]        = "layz/pool/command/power";
+  const char CMD_WATER[]        = "layz/pool/command/water/tempSet";
+  const char CMD_OTA[]          = "layz/wifi/command/update";
+  const char CMD_RELAY1[]       = "layz/pool/command/relay1";
+  const char CMD_RELAY2[]       = "layz/pool/command/relay2";
 }
 
 // Languages

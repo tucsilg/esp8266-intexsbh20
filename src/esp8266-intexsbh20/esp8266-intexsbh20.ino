@@ -74,6 +74,11 @@ String mqttPort;
 // 3 db DS18B20 fix címe (ha ismered őket), vagy index alapú olvasás
 DeviceAddress ds18b20_addresses[3];
 uint8_t ds18b20_count = 0;
+const char* ds18b20_topics[3] = {
+  MQTT_TOPIC::TEMP1,
+  MQTT_TOPIC::TEMP2,
+  MQTT_TOPIC::TEMP3
+};
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
@@ -252,37 +257,55 @@ void loop()
   handle_ds18b20_async();
 }
 
-void handle_ds18b20_async() {
+void handle_ds18b20_async()
+{
   unsigned long now = millis();
 
-  // 1. FÁZIS: Mérés indítása 10 mp-enként
-  if (!isTempConversionPending && (now - lastTempRequestTime >= TEMP_READ_INTERVAL)) {
-    ds18b20.requestTemperatures(); // Mérés kérése aszinkron módon
+  // 1. Mérés indítása 10 másodpercenként
+  if (!isTempConversionPending &&
+      (now - lastTempRequestTime >= TEMP_READ_INTERVAL))
+  {
+    ds18b20.requestTemperatures();
+
     lastTempRequestTime = now;
     isTempConversionPending = true;
   }
 
-  // 2. FÁZIS: Kiolvasás 1 másodperccel a kérés után (750ms kell a 12-bit felbontáshoz)
-  if (isTempConversionPending && (now - lastTempRequestTime >= 1000)) {
+  // 2. Mérés eredményének kiolvasása
+  // 12 bites felbontásnál maximum 750 ms szükséges
+  if (isTempConversionPending &&
+      (now - lastTempRequestTime >= 1000))
+  {
     isTempConversionPending = false;
 
-    for (uint8_t i = 0; i < 3; i++) {
-      float tempC = -127.0;
-      
-      if (i < ds18b20_count) {
-        tempC = ds18b20.getTempC(ds18b20_addresses[i]);
-      }
+    for (uint8_t i = 0; i < 3; i++)
+    {
+      if (i >= ds18b20_count)
+        continue;
 
-      // Csak érvényes mérést publikálunk
-      if (tempC > -55.0 && tempC < 125.0) {
-        char topic[32];
-        snprintf(topic, sizeof(topic), "pool/ext_temp/sensor%d", i + 1);
-        
-        char valBuf[8];
-        dtostrf(tempC, 4, 1, valBuf); // 1 tizedesjegyre kerekítve
-        
+      float tempC = ds18b20.getTempC(ds18b20_addresses[i]);
+
+      // Érvényes hőmérséklet ellenőrzése
+      if (tempC > -55.0 && tempC < 125.0)
+      {
+        String temperature = String(tempC, 1);
+
         // MQTT publikálás
-        mqttClient.publish(topic, valBuf, true); 
+        mqttClient.publish(
+          ds18b20_topics[i],
+          temperature,
+          mqttPublisher.isRetainAll()
+        );
+
+        DEBUG_MSG(
+          "DS18B20 #%d: %s C\n",
+          i + 1,
+          temperature.c_str()
+        );
+      }
+      else
+      {
+        DEBUG_MSG("DS18B20 #%d: sensor error\n", i + 1);
       }
     }
   }
