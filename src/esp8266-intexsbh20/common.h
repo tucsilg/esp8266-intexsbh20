@@ -30,6 +30,8 @@
 #include <climits>
 #include <c_types.h>
 #include <../d1_mini/pins_arduino.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 /*****************************************************************************
 
@@ -39,7 +41,7 @@
 
 // select Intex PureSpa model by commenting in the desired variant
 // A) PureSpa SB-H20, PureSpa SSP-H-20-1 and SimpleSpa SB–B20
-//#define MODEL_SB_H20
+#define MODEL_SB_H20
 // B) PureSpa SJB-HS
 //#define MODEL_SJB_HS
 
@@ -53,7 +55,13 @@
 
 //#define SERIAL_DEBUG
 
+// PIN Definíciók (D1 Mini esetén)
+#define ONEWIRE_BUS_PIN  D2 // GPIO14 (D2) - DS18B20 közös busz
+#define RELAY1_PIN       D3 // GPIO12 (D3) - Relé 1
+#define RELAY2_PIN       D4 // GPIO13 (D4) - Relé 2
+
 /*****************************************************************************/
+
 
 namespace CONFIG
 {
@@ -106,6 +114,7 @@ namespace MQTT_TOPIC
   const char STATE[]        = "wifi/state";
   const char OTA[]          = "wifi/update";
 
+
   // subscribe
   const char CMD_BUBBLE[]       = "pool/command/bubble";
   const char CMD_DISINFECTION[] = "pool/command/disinfection"; // SJB-HS only
@@ -115,6 +124,8 @@ namespace MQTT_TOPIC
   const char CMD_POWER[]        = "pool/command/power";
   const char CMD_WATER[]        = "pool/command/water/tempSet";
   const char CMD_OTA[]          = "wifi/command/update";
+  const char CMD_RELAY1[]       = "pool/command/relay1";
+  const char CMD_RELAY2[]       = "pool/command/relay2";
 }
 
 // Languages
@@ -126,8 +137,8 @@ enum class LANG
 // ESP8266 pins
 namespace PIN
 {
-  const uint8 CLOCK = D5;
-  const uint8 DATA  = D6;
+  const uint8 CLOCK = D6;
+  const uint8 DATA  = D5;
   const uint8 LATCH = D7;
 }
 

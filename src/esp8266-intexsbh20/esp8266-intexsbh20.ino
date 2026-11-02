@@ -62,16 +62,26 @@ ConfigurationFile config;
 NTCThermometer thermometer;
 OTAUpdate otaUpdate;
 PureSpaIO pureSpaIO;
+// OneWire és DallasTemp objektumok
+OneWire oneWire(ONEWIRE_BUS_PIN);
+DallasTemperature ds18b20(&oneWire);
 
 MQTTClient mqttClient;
 MQTTPublisher mqttPublisher(mqttClient, pureSpaIO, thermometer);
 String username;
 String password;
 String mqttPort;
+// 3 db DS18B20 fix címe (ha ismered őket), vagy index alapú olvasás
+DeviceAddress ds18b20_addresses[3];
+uint8_t ds18b20_count = 0;
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
 bool initialized = false;
+// Időzítéshez használt változók
+unsigned long lastTempRequestTime = 0;
+bool isTempConversionPending = false;
+const unsigned long TEMP_READ_INTERVAL = 10000; // 10 másodperc
 
 
 /**
@@ -79,7 +89,24 @@ bool initialized = false;
  */
 void setup()
 {
-  Serial.begin(74880); // 74880 Baud is the default data rate of the ESP8266 bootloader
+  Serial.begin(115200); // 74880 Baud is the default data rate of the ESP8266 bootloader
+  // Relé pinek beállítása (alapértelmezetten kikapcsolva)
+  pinMode(RELAY1_PIN, OUTPUT);
+  pinMode(RELAY2_PIN, OUTPUT);
+  digitalWrite(RELAY1_PIN, LOW);
+  digitalWrite(RELAY2_PIN, LOW);
+
+  // DS18B20 busz indítása
+  ds18b20.begin();
+  // FONTOS: Aszinkron működés bekapcsolása! 
+  // Így a requestTemperatures() NEM blokkolja a 100 kHz-es Intex buszt ~750 ms-ig.
+  ds18b20.setWaitForConversion(false);
+
+  // Szenzorok megszámlálása és címeik lekérése
+  ds18b20_count = ds18b20.getDeviceCount();
+  for (uint8_t i = 0; i < ds18b20_count && i < 3; i++) {
+    ds18b20.getAddress(ds18b20_addresses[i], i);
+  }
 
   // print versions
   Serial.printf_P(PSTR("%s MQTT WiFi Controller %s\n"), pureSpaIO.getModelName(), CONFIG::WIFI_VERSION);
@@ -107,6 +134,11 @@ void setup()
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { pureSpaIO.setFilterOn(b); });
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { pureSpaIO.setHeaterOn(b); });
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { pureSpaIO.setPowerOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_RELAY1, [](bool b) -> void { digitalWrite(RELAY1_PIN, (b) ? HIGH : LOW); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_RELAY2, [](bool b) -> void { digitalWrite(RELAY2_PIN, (b) ? HIGH : LOW); });
+
+
+
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { pureSpaIO.setDesiredWaterTempCelsius(i); });
       if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
@@ -215,6 +247,43 @@ void loop()
       // WiFi disconnected too long, restart ESP
       DEBUG_MSG("restarting ... (no WiFi connection for several minutes)\n");
       ESP.restart();
+    }
+  }
+  handle_ds18b20_async();
+}
+
+void handle_ds18b20_async() {
+  unsigned long now = millis();
+
+  // 1. FÁZIS: Mérés indítása 10 mp-enként
+  if (!isTempConversionPending && (now - lastTempRequestTime >= TEMP_READ_INTERVAL)) {
+    ds18b20.requestTemperatures(); // Mérés kérése aszinkron módon
+    lastTempRequestTime = now;
+    isTempConversionPending = true;
+  }
+
+  // 2. FÁZIS: Kiolvasás 1 másodperccel a kérés után (750ms kell a 12-bit felbontáshoz)
+  if (isTempConversionPending && (now - lastTempRequestTime >= 1000)) {
+    isTempConversionPending = false;
+
+    for (uint8_t i = 0; i < 3; i++) {
+      float tempC = -127.0;
+      
+      if (i < ds18b20_count) {
+        tempC = ds18b20.getTempC(ds18b20_addresses[i]);
+      }
+
+      // Csak érvényes mérést publikálunk
+      if (tempC > -55.0 && tempC < 125.0) {
+        char topic[32];
+        snprintf(topic, sizeof(topic), "pool/ext_temp/sensor%d", i + 1);
+        
+        char valBuf[8];
+        dtostrf(tempC, 4, 1, valBuf); // 1 tizedesjegyre kerekítve
+        
+        // MQTT publikálás
+        mqttClient.publish(topic, valBuf, true); 
+      }
     }
   }
 }

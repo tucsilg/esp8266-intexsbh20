@@ -1,7 +1,7 @@
 {
- "wifiSSID":       "WiFi-SSID",
- "wifiPassphrase": "WiFi-Secret",
- "mqttServer":     "mqtt.at.home",
+"wifiSSID":       "TucsiAP",
+ "wifiPassphrase": "mokuska711018",
+ "mqttServer":     "192.168.5.252",
  "mqttPort":       "1883",
  "mqttUser":       "leave blank if you don't have authentication",
  "mqttPassword":   "leave blank if you don't have authentication",
