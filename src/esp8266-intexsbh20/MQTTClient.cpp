@@ -36,6 +36,9 @@ void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int len
 {
   message[length] = '\0';
 
+  // Ignore startup discovery messages on command topics.
+  if (length == 6 && memcmp(message, "Live..", 6) == 0) return;
+
   // find subscription for topic
   auto i = boolSubscriber.find(topic);
   if (i != boolSubscriber.end())
@@ -91,6 +94,49 @@ void MQTTClient::reconnect()
     {
       // connected
       Serial.println("success");
+
+      // Announce every defined MQTT topic on each successful connection.
+      // Do not retain command announcements: retained commands could be replayed
+      // to another client subscribing later.
+      const char* const startupTopics[] = {
+        MQTT_TOPIC::BUBBLE,
+        MQTT_TOPIC::DISINFECTION,
+        MQTT_TOPIC::ERROR,
+        MQTT_TOPIC::FILTER,
+        MQTT_TOPIC::HEATER,
+        MQTT_TOPIC::JET,
+        MQTT_TOPIC::MODEL,
+        MQTT_TOPIC::POWER,
+        MQTT_TOPIC::WATER_ACT,
+        MQTT_TOPIC::WATER_SET,
+        MQTT_TOPIC::VERSION,
+        MQTT_TOPIC::IP,
+        MQTT_TOPIC::RSSI,
+        MQTT_TOPIC::WIFI_TEMP,
+        MQTT_TOPIC::STATE,
+        MQTT_TOPIC::OTA,
+        MQTT_TOPIC::RELAY1,
+        MQTT_TOPIC::RELAY2,
+        MQTT_TOPIC::TEMP1,
+        MQTT_TOPIC::TEMP2,
+        MQTT_TOPIC::TEMP3,
+        MQTT_TOPIC::CMD_BUBBLE,
+        MQTT_TOPIC::CMD_DISINFECTION,
+        MQTT_TOPIC::CMD_FILTER,
+        MQTT_TOPIC::CMD_HEATER,
+        MQTT_TOPIC::CMD_JET,
+        MQTT_TOPIC::CMD_POWER,
+        MQTT_TOPIC::CMD_WATER,
+        MQTT_TOPIC::CMD_OTA,
+        MQTT_TOPIC::CMD_RELAY1,
+        MQTT_TOPIC::CMD_RELAY2,
+      };
+      for (const char* topic : startupTopics)
+      {
+        const bool isCommand = strstr(topic, "/command/") != nullptr;
+        mqttClient.publish(topic, "Live..", !isCommand);
+        delay(0); // yield to ESP8266 Wi-Fi stack
+      }
 
       // publish metadata
       if (!lastConnectTime)
