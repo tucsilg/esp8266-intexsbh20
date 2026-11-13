@@ -1,0 +1,37 @@
+Bevezeto kabel:
+Piros - VCC nincs hasznala
+Zold - GND
+Feher,kek -  DATA
+Barna, fekete - LATCH
+Narancs, sarga - CLK
+
+ 1 red    5v
+ 2 blue   gnd
+ 3 white  data    D5
+ 4 yellow clk     D6
+ 5 black  latch   D7
+  
+ Pupmpa
+ Red     5V
+ Green   GND
+ White   Data
+ Yellow  CLK
+ Black   Latch
+ 
+ Kabel
+ Input        --  Output
+ RED    5V    --  5V
+ Green  GND   --  GND
+ White  Data  --  Blue
+ Yellow CLK   --  Orange
+ Black  Latch --  Brown
+ 
+ Atthidalo kek clk
+ atthidalo lila data
+ atthidalo zold CH
+
+ =========================================
+ Homero:
+ Or/OrWh - 3.3 V
+ Br/BrWh - Signal
+ Bl/BlWh - GND  

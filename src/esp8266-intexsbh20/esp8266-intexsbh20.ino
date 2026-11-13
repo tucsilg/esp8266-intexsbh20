@@ -72,12 +72,11 @@ String username;
 String password;
 String mqttPort;
 // 3 db DS18B20 fix címe (ha ismered őket), vagy index alapú olvasás
-DeviceAddress ds18b20_addresses[3];
+DeviceAddress ds18b20_addresses[2];
 uint8_t ds18b20_count = 0;
-const char* ds18b20_topics[3] = {
+const char* ds18b20_topics[2] = {
   MQTT_TOPIC::TEMP1,
-  MQTT_TOPIC::TEMP2,
-  MQTT_TOPIC::TEMP3
+  MQTT_TOPIC::TEMP2
 };
 
 unsigned long disconnectTime = 0;
@@ -110,7 +109,7 @@ void setup()
 
   // Szenzorok megszámlálása és címeik lekérése
   ds18b20_count = ds18b20.getDeviceCount();
-  for (uint8_t i = 0; i < ds18b20_count && i < 3; i++) {
+  for (uint8_t i = 0; i < ds18b20_count && i < 2; i++) {
     ds18b20.getAddress(ds18b20_addresses[i], i);
   }
 
@@ -279,7 +278,7 @@ void handle_ds18b20_async()
   {
     isTempConversionPending = false;
 
-    for (uint8_t i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < 2; i++)
     {
       if (i >= ds18b20_count)
         continue;
